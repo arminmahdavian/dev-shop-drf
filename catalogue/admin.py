@@ -45,9 +45,17 @@ class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'require_shipping', 'track_stock', 'attribute_count')
     list_filter = ('require_shipping', 'track_stock', AttributeCountFilter)
     inlines =[ProductAttributeInline]
+    actions = ['enable_track_stock', 'disable_track_stock']
+
 
     def attribute_count(self, obj):
         return obj.attributes.count()
+
+    def enable_track_stock(self, request, queryset):
+        queryset.update(track_stock=True)
+
+    def disable_track_stock(self, request, queryset):
+        queryset.update(track_stock=False)
 
 
 
