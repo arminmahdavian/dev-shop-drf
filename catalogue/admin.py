@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.db.models import Count
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 from .models import Category, Product, Option, ProductAttribute
@@ -21,10 +22,28 @@ class ProductAttributeInline(admin.TabularInline):
     model = ProductAttribute
     extra = 2
 
+
+class AttributeCountFilter(admin.SimpleListFilter):
+    title = "Attribute Count"
+    parameter_name = "attr_count"
+
+    def lookups(self, request, model_admin):
+        return [
+            ('more_5', 'More than 5'),
+            ('lower_5', 'Lower than 5'),
+        ]
+
+    def queryset(self, request, queryset):
+        if self.value() == "more_5":
+            return queryset.annotate(attr_count=Count('attributes')).filter(attr_count__gt=1)
+        if self.value() == "lower_5":
+            return queryset.annotate(attr_count=Count('attributes')).filter(attr_count__lt=1)
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'require_shipping', 'track_stock', 'attribute_count')
-    list_filter = ('require_shipping', 'track_stock')
+    list_filter = ('require_shipping', 'track_stock', AttributeCountFilter)
     inlines =[ProductAttributeInline]
 
     def attribute_count(self, obj):
