@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.db.models import Count
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
-from .models import Category, Product, Option, ProductAttribute
+from .models import Category, ProductClass, Option, ProductAttribute
 
 
 # Register your models here.
@@ -40,7 +40,7 @@ class AttributeCountFilter(admin.SimpleListFilter):
             return queryset.annotate(attr_count=Count('attributes')).filter(attr_count__lt=1)
 
 
-@admin.register(Product)
+@admin.register(ProductClass)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug', 'require_shipping', 'track_stock', 'attribute_count')
     list_filter = ('require_shipping', 'track_stock', AttributeCountFilter)
