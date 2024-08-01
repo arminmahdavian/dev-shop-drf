@@ -18,11 +18,6 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
-doc_patterns = [
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-]
 
 admin_urls = [
     path('api/admin/catalogue/', include(('catalogue.urls.admin', 'DevShop.apps.catalogue'), namespace='catalogue-admin')),
@@ -30,6 +25,12 @@ admin_urls = [
 
 front_urls = [
     path('api/front/catalogue/', include(('catalogue.urls.front', 'DevShop.apps.catalogue'), namespace='catalogue-front')),
+]
+
+doc_patterns = [
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 urlpatterns = [
