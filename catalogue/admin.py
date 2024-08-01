@@ -46,6 +46,7 @@ class ProductAdmin(admin.ModelAdmin):
     list_filter = ('require_shipping', 'track_stock', AttributeCountFilter)
     inlines =[ProductAttributeInline]
     actions = ['enable_track_stock', 'disable_track_stock']
+    prepopulated_fields = {"slug": ("title",)}
 
 
     def attribute_count(self, obj):
