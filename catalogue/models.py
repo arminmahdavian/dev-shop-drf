@@ -134,7 +134,12 @@ class Product(models.Model):
                                       related_name='products')
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue')
     recommended_products = models.ManyToManyField('catalogue.Product', through='ProductRecommendation', blank=True)
+
     categories = models.ManyToManyField(Category, related_name='categories')
+
+    @property
+    def main_image(self):
+        return self.images.first() if self.images.exists() else None
 
 
     class Meta:
@@ -167,6 +172,22 @@ class ProductRecommendation(models.Model):
     class Meta:
         unique_together = ('primary', 'recommendation')
         ordering = ('primary', '-rank')
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='images')
+    image = models.ForeignKey('media.Image', on_delete=models.PROTECT)
+
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ('display_order',)
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        for index, image in enumerate(self.product.images.all()):
+            image.display_order = index
+            image.save()
 
 
 
