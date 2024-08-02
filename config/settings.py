@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'analytics.apps.AnalyticsConfig',
     'media.apps.MediaConfig',
     'catalogue.apps.CatalogueConfig',
+    'inventory.apps.InventoryConfig',
 
 ]
 

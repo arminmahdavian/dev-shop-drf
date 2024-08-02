@@ -25,23 +25,24 @@ class Image(models.Model):
     focal_point_height = models.PositiveIntegerField(null=True, blank=True)
 
     def save(self, *args, **kwargs):
+        # TODO: fix
+        if not self.image.file.closed:
+            self.file_size = self.image.size
 
-        self.file_size = self.image.size
-
-        hasher = hashlib.sha1()
-        for chunk in self.image.file.chunks():
-            hasher.update(chunk)
-        self.file_hash = hasher.hexdigest()
+            hasher = hashlib.sha1()
+            for chunk in self.image.file.chunks():
+                hasher.update(chunk)
+            self.file_hash = hasher.hexdigest()
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return str(self.id)
+        return self.title if self.title else str(self.id)
 
 
 @receiver(pre_save, sender=Image)
 def check_duplicate_hash(sender, instance, **kwargs):
-    existed = Image.objects.filter(file_hash=instance.file_hash).exists()
+    existed = Image.objects.filter(file_hash=instance.file_hash).exclude(pk=instance.pk).exists()
     if existed:
         raise DuplicateImageException("Duplicate image")
 
