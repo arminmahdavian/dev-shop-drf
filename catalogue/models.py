@@ -147,6 +147,9 @@ class Product(AuditableModel):
         verbose_name = "Product"
         verbose_name_plural = "Products"
 
+    def __str__(self):
+        return self.title if self.title else str(self.id)
+
 
 class ProductAttributeValue(models.Model):
     product = models.ForeignKey(Product, on_delete=models.CASCADE)

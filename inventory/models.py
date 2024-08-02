@@ -15,6 +15,9 @@ class StockRecord(models.Model):
     class Meta:
         pass
 
+    def __str__(self):
+        return self.product.title if self.product else str(self.product.id)
+
 
 
 

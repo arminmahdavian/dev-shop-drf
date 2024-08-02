@@ -3,7 +3,7 @@ from django.db.models import Count
 from treebeard.admin import TreeAdmin
 from treebeard.forms import movenodeform_factory
 from .models import Category, ProductClass, Option, ProductAttribute, ProductRecommendation, Product, \
-    ProductAttributeValue
+    ProductAttributeValue, ProductImage
 
 
 # Register your models here.
@@ -73,10 +73,15 @@ class ProductAttributeValueInline(admin.TabularInline):
     extra = 2
 
 
+class ProductImageInline(admin.TabularInline):
+    model = ProductImage
+    extra = 2
+
+
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
     list_display = ('title', 'slug',)
-    inlines = [ProductAttributeValueInline, ProductRecommendationInline]
+    inlines = [ProductAttributeValueInline, ProductImageInline, ProductRecommendationInline]
     prepopulated_fields = {"slug": ("title",)}
 
 
