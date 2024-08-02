@@ -132,7 +132,9 @@ class Product(models.Model):
     slug = models.SlugField(unique=True)
 
     product_class = models.ForeignKey(ProductClass, on_delete=models.PROTECT, null=True, blank=True, related_name='products')
+
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue')
+    recommended_products = models.ManyToManyField('catalogue.Product', through='ProductRecommendation', blank=True)
 
     class Meta:
         verbose_name = "Product"
@@ -153,5 +155,16 @@ class ProductAttributeValue(models.Model):
         verbose_name = "Attribute Value"
         verbose_name_plural = "Attribute Values"
         unique_together = ('product', 'attribute')
+
+
+class ProductRecommendation(models.Model):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='primary_recommendation')
+    recommendation = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='recommendations')
+    rank = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        unique_together = ('primary', 'recommendation')
+        ordering = ['primary', '-rank']
+
 
 
