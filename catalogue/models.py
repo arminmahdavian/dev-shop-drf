@@ -1,3 +1,5 @@
+import hashlib
+
 from django.db import models
 from django.utils.text import slugify
 from treebeard.mp_tree import MP_Node
@@ -184,5 +186,15 @@ class Image(models.Model):
     focal_point_width = models.PositiveIntegerField(null=True, blank=True)
     focal_point_height = models.PositiveIntegerField(null=True, blank=True)
 
+    def save(self, *args, **kwargs):
+
+        self.file_size = self.image.size
+
+        hasher = hashlib.sha1()
+        for chunk in self.image.file.chunks():
+            hasher.update(chunk)
+        self.file_hash = hasher.digest()
+
+        super().save(*args, **kwargs)
 
 
