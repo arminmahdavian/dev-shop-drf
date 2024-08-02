@@ -1,9 +1,9 @@
 from django.db import models
 from django.utils.text import slugify
 from treebeard.mp_tree import MP_Node
-from DevShop.libs.dbs.fields import UpperCaseCharField
+from libs.dbs.fields import UpperCaseCharField
 
-from catalogue.managers import CategoryQyerySet
+from catalogue.managers import CategoryQuerySet
 
 
 # Create your models here.
@@ -13,65 +13,64 @@ class Category(MP_Node):
     title = models.CharField(max_length=255, db_index=True)
     description = models.CharField(max_length=2048, null=True, blank=True)
     is_public = models.BooleanField(default=True)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, allow_unicode=True)
 
-    objects = CategoryQyerySet.as_manager()
+    objects = CategoryQuerySet.as_manager()
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         verbose_name = "Category"
         verbose_name_plural = "Categories"
 
-    def __str__(self):
-        return self.title
-
 
 class OptionGroup(models.Model):
     title = models.CharField(max_length=255, db_index=True)
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = "Option Group"
         verbose_name_plural = "Option Groups"
-
-    def __str__(self):
-        return self.title
 
 
 class OptionGroupValue(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     group = models.ForeignKey(OptionGroup, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = "Option Group Value"
         verbose_name_plural = "Option Group Values"
-
-    def __str__(self):
-        return self.title
 
 
 class ProductClass(models.Model):
     title = models.CharField(max_length=255, db_index=True)
     description = models.CharField(max_length=2048, null=True, blank=True)
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, allow_unicode=True)
 
     track_stock = models.BooleanField(default=True)
     require_shipping = models.BooleanField(default=True)
 
-    options = models.ManyToManyField('Option', null=True, blank=True)
+    options = models.ManyToManyField('Option', blank=True)
 
     @property
     def has_attribute(self):
         return self.attributes.exists()
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = "Product Class"
         verbose_name_plural = "Product Classes"
 
-    def __str__(self):
-        return self.title
-
 
 class ProductAttribute(models.Model):
-
     class AttributeTypeChoice(models.TextChoices):
         text = 'text'
         integer = 'integer'
@@ -79,18 +78,18 @@ class ProductAttribute(models.Model):
         option = 'option'
         multi_option = 'multi_option'
 
-    product_class = models.ForeignKey(ProductClass, on_delete=models.CASCADE, null=True, blank=True, related_name='attributes')
+    product_class = models.ForeignKey(ProductClass, on_delete=models.CASCADE, null=True, related_name='attributes')
     title = models.CharField(max_length=64)
     type = models.CharField(max_length=16, choices=AttributeTypeChoice.choices, default=AttributeTypeChoice.text)
     option_group = models.ForeignKey(OptionGroup, on_delete=models.PROTECT, null=True, blank=True)
     required = models.BooleanField(default=False)
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = "Product Attribute"
         verbose_name_plural = "Product Attributes"
-
-    def __str__(self):
-        return self.title
 
 
 class Option(models.Model):
@@ -106,12 +105,12 @@ class Option(models.Model):
     option_group = models.ForeignKey(OptionGroup, on_delete=models.PROTECT, null=True, blank=True)
     required = models.BooleanField(default=False)
 
-    class Meta:
-        verbose_name = "Option"
-        verbose_name_plural = "Options"
-
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name = "Option"
+        verbose_name_plural = "Option"
 
 
 class Product(models.Model):
@@ -121,20 +120,22 @@ class Product(models.Model):
         parent = 'parent'
         child = 'child'
 
-    structure = models.CharField(max_length=16, choices=ProductTypeChoice, default=ProductTypeChoice.standalone)
-    parent = models.ForeignKey('self', related_name='children', on_delete=models.CASCADE, null=True, blank=True)
+    structure = models.CharField(max_length=16, choices=ProductTypeChoice.choices, default=ProductTypeChoice.standalone)
+    parent = models.ForeignKey("self", related_name="children", on_delete=models.CASCADE, null=True, blank=True)
     title = models.CharField(max_length=128, null=True, blank=True)
     upc = UpperCaseCharField(max_length=24, unique=True, null=True, blank=True)
     is_public = models.BooleanField(default=True)
     meta_title = models.CharField(max_length=128, null=True, blank=True)
     meta_description = models.TextField(null=True, blank=True)
 
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(unique=True, allow_unicode=True)
 
-    product_class = models.ForeignKey(ProductClass, on_delete=models.PROTECT, null=True, blank=True, related_name='products')
-
+    product_class = models.ForeignKey(ProductClass, on_delete=models.PROTECT, null=True, blank=True,
+                                      related_name='products')
     attributes = models.ManyToManyField(ProductAttribute, through='ProductAttributeValue')
     recommended_products = models.ManyToManyField('catalogue.Product', through='ProductRecommendation', blank=True)
+    categories = models.ManyToManyField(Category, related_name='categories')
+
 
     class Meta:
         verbose_name = "Product"
@@ -148,8 +149,9 @@ class ProductAttributeValue(models.Model):
     value_text = models.TextField(null=True, blank=True)
     value_integer = models.IntegerField(null=True, blank=True)
     value_float = models.FloatField(null=True, blank=True)
-    value_option = models.ForeignKey(OptionGroupValue, on_delete=models.PROTECT)
-    value_multi_option = models.ManyToManyField(OptionGroupValue)
+    value_option = models.ForeignKey(OptionGroupValue, on_delete=models.PROTECT, null=True, blank=True)
+    value_multi_option = models.ManyToManyField(OptionGroupValue, blank=True,
+                                                related_name='multi_valued_attribute_value')
 
     class Meta:
         verbose_name = "Attribute Value"
@@ -158,13 +160,13 @@ class ProductAttributeValue(models.Model):
 
 
 class ProductRecommendation(models.Model):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='primary_recommendation')
-    recommendation = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='recommendations')
-    rank = models.PositiveIntegerField(default=0)
+    primary = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='primary_recommendation')
+    recommendation = models.ForeignKey(Product, on_delete=models.CASCADE)
+    rank = models.PositiveSmallIntegerField(default=0)
 
     class Meta:
         unique_together = ('primary', 'recommendation')
-        ordering = ['primary', '-rank']
+        ordering = ('primary', '-rank')
 
 
 
