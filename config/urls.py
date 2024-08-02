@@ -16,6 +16,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
 
 
@@ -35,7 +37,7 @@ doc_patterns = [
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-] + admin_urls + front_urls + doc_patterns
+] + admin_urls + front_urls + doc_patterns + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 admin.site.site_title = "DevShop"
 admin.site.site_header = "DevShop"

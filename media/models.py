@@ -1,6 +1,10 @@
 import hashlib
 
 from django.db import models
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
+
+from media.exceptions import DuplicateImageException
 
 
 # Create your models here.
@@ -12,8 +16,8 @@ class Image(models.Model):
     width = models.IntegerField(editable=False)
     height = models.IntegerField(editable=False)
 
-    file_hash = models.CharField(max_length=40, db_index=True)
-    file_size = models.PositiveIntegerField(null=True)
+    file_hash = models.CharField(max_length=40, db_index=True, editable=False)
+    file_size = models.PositiveIntegerField(null=True, editable=False)
 
     focal_point_x = models.PositiveIntegerField(null=True, blank=True)
     focal_point_y = models.PositiveIntegerField(null=True, blank=True)
@@ -27,10 +31,19 @@ class Image(models.Model):
         hasher = hashlib.sha1()
         for chunk in self.image.file.chunks():
             hasher.update(chunk)
-        self.file_hash = hasher.digest()
+        self.file_hash = hasher.hexdigest()
 
         super().save(*args, **kwargs)
 
+    def __str__(self):
+        return str(self.id)
+
+
+@receiver(pre_save, sender=Image)
+def check_duplicate_hash(sender, instance, **kwargs):
+    existed = Image.objects.filter(file_hash=instance.file_hash).exists()
+    if existed:
+        raise DuplicateImageException("Duplicate image")
 
 
 
