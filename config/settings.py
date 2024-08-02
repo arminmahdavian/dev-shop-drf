@@ -45,6 +45,8 @@ INSTALLED_APPS = [
 
     # Local
     'catalogue.apps.CatalogueConfig',
+    'media.apps.MediaConfig',
+
 ]
 
 MIDDLEWARE = [
