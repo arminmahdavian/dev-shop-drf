@@ -44,8 +44,9 @@ INSTALLED_APPS = [
     'treebeard',
 
     # Local
-    'catalogue.apps.CatalogueConfig',
+    'analytics.apps.AnalyticsConfig',
     'media.apps.MediaConfig',
+    'catalogue.apps.CatalogueConfig',
 
 ]
 

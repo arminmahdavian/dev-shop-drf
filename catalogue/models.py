@@ -4,6 +4,7 @@ from treebeard.mp_tree import MP_Node
 from libs.dbs.fields import UpperCaseCharField
 
 from catalogue.managers import CategoryQuerySet
+from libs.dbs.models import AuditableModel
 
 
 # Create your models here.
@@ -113,7 +114,7 @@ class Option(models.Model):
         verbose_name_plural = "Option"
 
 
-class Product(models.Model):
+class Product(AuditableModel):
 
     class ProductTypeChoice(models.TextChoices):
         standalone = 'standalone'
@@ -188,6 +189,8 @@ class ProductImage(models.Model):
         for index, image in enumerate(self.product.images.all()):
             image.display_order = index
             image.save()
+
+
 
 
 
