@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'treebeard',
 
     # Local
+    'auths.users.apps.UsersConfig',
     'analytics.apps.AnalyticsConfig',
     'media.apps.MediaConfig',
     'catalogue.apps.CatalogueConfig',
@@ -92,6 +93,8 @@ DATABASES = {
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
+
+AUTH_USER_MODEL = 'users.User'
 
 AUTH_PASSWORD_VALIDATORS = [
     {
